@@ -46,8 +46,8 @@ local config = {
     TeamEquip = {
         -- Unit equip config lives here so Controller/Eyes/Reader can share one control file.
         -- Exact names must match GlobalInventory UnitName.Text.
-        Enabled = false,
-        AutoStart = true,
+        Enabled = true,
+        AutoStart = false,
         WantedUnits = {
             -- "Bounty Hunter",
             -- "Gaari",
