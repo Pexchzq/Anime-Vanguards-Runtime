@@ -8,7 +8,7 @@
 
 local RELEASE = "v1.1.1"
 local RUNTIME_RELEASE = "v1.1.0"
-local CACHE_BUST = "team-equip-first-v111"
+local CACHE_BUST = "stage-router-v111"
 local BASE_URL = "https://raw.githubusercontent.com/Pexchzq/Anime-Vanguards-Runtime/main/releases/" .. RUNTIME_RELEASE .. "/runtime/"
 
 local CRITICAL_FILES = {
@@ -16,6 +16,8 @@ local CRITICAL_FILES = {
     "AV-EYES-INVENTORY.lua",
     "MAP-MACRO-CONFIG.lua",
     "AV-CONTROLLER-CONFIG.lua",
+    "AV-STAGE-ROUTER-CONFIG.lua",
+    "AV-STAGE-ROUTER-CONTROLLER.lua",
     "AV-TEAM-EQUIP-CONTROLLER.lua",
 }
 
