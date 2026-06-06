@@ -9,14 +9,17 @@
 local RELEASE = "v1.1.0"
 local BASE_URL = "https://raw.githubusercontent.com/Pexchzq/Anime-Vanguards-Runtime/main/releases/" .. RELEASE .. "/runtime/"
 
-local RUNTIME_FILES = {
+local CRITICAL_FILES = {
     "MACRO-BRAIN.lua",
     "AV-EYES-INVENTORY.lua",
     "MAP-MACRO-CONFIG.lua",
     "AV-CONTROLLER-CONFIG.lua",
+    "AV-TEAM-EQUIP-CONTROLLER.lua",
+}
+
+local OPTIONAL_FILES = {
     "MACRO-READER.lua",
     "AV-MACRO-CONTROLLER.lua",
-    "AV-TEAM-EQUIP-CONTROLLER.lua",
 }
 
 local function log(message)
@@ -43,8 +46,15 @@ if type(_G.AVStop) == "function" then
     pcall(_G.AVStop)
 end
 
-for _, fileName in ipairs(RUNTIME_FILES) do
+for _, fileName in ipairs(CRITICAL_FILES) do
     loadRemoteFile(fileName)
+end
+
+for _, fileName in ipairs(OPTIONAL_FILES) do
+    local ok, errorMessage = pcall(loadRemoteFile, fileName)
+    if not ok then
+        log("optional load failed: " .. fileName .. " | " .. tostring(errorMessage))
+    end
 end
 
 log("system loaded and auto-started")
