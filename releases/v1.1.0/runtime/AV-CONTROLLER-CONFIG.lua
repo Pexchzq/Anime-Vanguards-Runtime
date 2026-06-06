@@ -44,21 +44,19 @@ local config = {
     },
 
     TeamEquip = {
-        -- Unit equip config lives here so Controller/Eyes/Reader can share one control file.
-        -- Exact names must match GlobalInventory UnitName.Text.
+        -- Empty WantedUnits + EquipAllIfWantedEmpty=true means equip every owned unit Eyes can read until slots are full.
         Enabled = true,
         AutoStart = true,
-        WantedUnits = {
-            -- "Bounty Hunter",
-            -- "Gaari",
-        },
+        WantedUnits = {},
         EquipAllIfWantedEmpty = true,
-        MaxSlots = 2,
+        MaxSlots = 6,
         RetryPerUnit = 2,
         VerifyTimeoutSeconds = 2.5,
         VerifyIntervalSeconds = 0.15,
         BetweenUnitSeconds = 0.25,
         StopWhenSlotsFull = true,
+        Verbose = false,
+        PrintSlotsOnFinish = false,
     },
 }
 
