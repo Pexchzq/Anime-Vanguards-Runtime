@@ -17,7 +17,7 @@ local config = {
     Version = 1,
 
     Enabled = true,
-    AutoStart = false,
+    AutoStart = true,
 
     LobbyPlaceId = 16146832113,
     DelayBetweenRemotesSeconds = 3,
@@ -30,19 +30,19 @@ local config = {
             Name = "Story Stage11 before level 30",
             Enabled = true,
             When = {
-                MaxLevel = 30,
+                MaxLevel = 31,
             },
             Match = {
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
-                Stage = "Stage11",
+                Stage = "Stage12",
                 FriendsOnly = false,
             },
         },
         {
             Name = "Story Stage12 from level 30",
-            Enabled = true,
+            Enabled = false,
             When = {
                 MinLevel = 30,
             },
