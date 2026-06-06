@@ -24,6 +24,19 @@ local config = {
         ActionCooldownSeconds = 4.0,
     },
 
+    OnGoalComplete = {
+        -- External systems can set _G.AVGoalComplete = true or call _G.AVSetGoalComplete(reason).
+        -- This controller is the only owner of the "return to lobby after goal complete" remote.
+        Enabled = true,
+        AutoStart = true,
+        Action = "Lobby", -- Lobby | Stop
+        RequireMatchEnd = false,
+        DelayBeforeActionSeconds = 2.0,
+        ActionCooldownSeconds = 10.0,
+        PollSeconds = 1.0,
+        Verbose = false,
+    },
+
     Rules = {
         {
             Name = "Defeat retry same map",
@@ -44,7 +57,8 @@ local config = {
     },
 
     TeamEquip = {
-        -- Empty WantedUnits + EquipAllIfWantedEmpty=true means equip every owned unit Eyes can read until slots are full.
+        -- Unit equip config lives here so Controller/Eyes/Reader can share one control file.
+        -- Exact names must match GlobalInventory UnitName.Text.
         Enabled = true,
         AutoStart = true,
         WantedUnits = {},
