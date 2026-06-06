@@ -42,9 +42,27 @@ local config = {
             Action = "Next",
         },
     },
+
+    TeamEquip = {
+        -- Unit equip config lives here so Controller/Eyes/Reader can share one control file.
+        -- Exact names must match GlobalInventory UnitName.Text.
+        Enabled = false,
+        AutoStart = false,
+        WantedUnits = {
+            -- "Bounty Hunter",
+            -- "Gaari",
+        },
+        EquipAllIfWantedEmpty = false,
+        MaxSlots = 6,
+        RetryPerUnit = 2,
+        VerifyTimeoutSeconds = 2.5,
+        VerifyIntervalSeconds = 0.15,
+        BetweenUnitSeconds = 0.25,
+        StopWhenSlotsFull = true,
+    },
 }
 
 _G.AVControllerConfig = config
-print("[AV-CONTROLLER-CONFIG V1.0] loaded | defaultAction=" .. tostring(config.EndScreenPolicy.DefaultAction))
+print("[AV-CONTROLLER-CONFIG V1.0] loaded | defaultAction=" .. tostring(config.EndScreenPolicy.DefaultAction) .. " | teamEquipEnabled=" .. tostring(config.TeamEquip.Enabled))
 
 return config
