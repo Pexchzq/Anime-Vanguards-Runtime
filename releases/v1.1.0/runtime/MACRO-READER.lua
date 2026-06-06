@@ -68,6 +68,7 @@ local upgradeLabelConnections = {}
 local lastUpgradeByGuid = {}
 local brainWarningLogged = false
 local MAX_BRAIN_SNAPSHOT_AGE = 3.5
+local lastRunResult = "idle"
 
 local unitEvent = ReplicatedStorage:WaitForChild("Networking"):WaitForChild("UnitEvent")
 local loadMacro = nil
@@ -909,6 +910,7 @@ local function runMacro(source)
     loadedMacro = macro
     running = true
     stopRequested = false
+    lastRunResult = "running"
     currentStepIndex = 0
     runtimeByPlacementOrder = {}
     lastUpgradeByGuid = {}
@@ -928,6 +930,7 @@ local function runMacro(source)
             if state.endScreenVisible then
                 log("match outcome detected; stopping and resetting step pointer | " .. stateLine(state) .. " | path=" .. tostring(state.outcomePath))
                 stopRequested = true
+                lastRunResult = "match_ended"
                 currentStepIndex = 0
                 break
             end
@@ -937,9 +940,11 @@ local function runMacro(source)
             if not ok then
                 if reason == "MATCH_ENDED" then
                     log(string.format("[STEP %02d] match ended; resetting for next round", index))
+                    lastRunResult = "match_ended"
                     currentStepIndex = 0
                 else
                     log(string.format("[STEP %02d] failed: %s", index, tostring(reason)))
+                    lastRunResult = "step_failed"
                 end
                 stopRequested = true
                 break
@@ -956,8 +961,12 @@ local function runMacro(source)
         disconnectAllUpgradeObservers()
 
         if stopRequested then
+            if lastRunResult == "running" then
+                lastRunResult = "manual_stop"
+            end
             log("finished with stop/failure")
         else
+            lastRunResult = "completed_steps"
             log("finished successfully")
         end
     end)
@@ -1023,8 +1032,14 @@ local function macroReaderStartFromMapConfig(configPath)
         local firstRound = true
 
         while not manualStopRequested do
-            if not firstRound and not waitForEndScreenBeforeNextRound() then
-                break
+            if not firstRound then
+                if lastRunResult == "match_ended" then
+                    log("round re-arm | previous round already ended; waiting for next start gate")
+                else
+                    if not waitForEndScreenBeforeNextRound() then
+                        break
+                    end
+                end
             end
 
             stopRequested = false
@@ -1075,12 +1090,13 @@ end
 
 local function macroReaderStatus()
     log(string.format(
-        "running=%s | waitingForStart=%s | supervisor=%s | currentStep=%d | loadedSteps=%d",
+        "running=%s | waitingForStart=%s | supervisor=%s | currentStep=%d | loadedSteps=%d | lastRun=%s",
         tostring(running),
         tostring(waitingForStart),
         tostring(mapConfigSupervisorRunning),
         currentStepIndex,
-        loadedMacro and #loadedMacro or 0
+        loadedMacro and #loadedMacro or 0,
+        tostring(lastRunResult)
     ))
 end
 
