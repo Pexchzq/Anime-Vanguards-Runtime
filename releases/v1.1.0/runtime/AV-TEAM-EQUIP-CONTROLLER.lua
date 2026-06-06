@@ -43,6 +43,8 @@ local DEFAULT_CONFIG = {
     VerifyIntervalSeconds = 0.15,
     BetweenUnitSeconds = 0.25,
     StopWhenSlotsFull = true,
+    Verbose = false,
+    PrintSlotsOnFinish = false,
 }
 
 local player = Players.LocalPlayer
@@ -72,6 +74,12 @@ local previousAVStop = rawget(_G, "AVStop")
 
 local function log(message)
     print("[" .. VERSION .. "] " .. tostring(message))
+end
+
+local function verboseLog(config, message)
+    if config.Verbose then
+        log(message)
+    end
 end
 
 local function cloneArray(value)
@@ -214,7 +222,6 @@ local function buildPlan()
                 plan[#plan + 1] = unit
             else
                 state.missing += 1
-                log("[PLAN-MISSING] wanted=" .. tostring(wantedName))
             end
         end
     elseif config.EquipAllIfWantedEmpty then
@@ -262,7 +269,10 @@ local function finish(reason)
     state.running = false
     state.reason = reason or state.reason
     log("finished | planned=" .. tostring(state.planned) .. " | attempted=" .. tostring(state.attempted) .. " | successful=" .. tostring(state.successful) .. " | missing=" .. tostring(state.missing) .. " | reason=" .. tostring(state.reason))
-    printSlots()
+    local config = getConfig()
+    if config.PrintSlotsOnFinish then
+        printSlots()
+    end
 end
 
 local function printPlan()
@@ -298,7 +308,9 @@ local function start()
     if occupied >= config.MaxSlots then
         state.reason = "slots already full"
         log("not started | reason=slots already full")
-        printSlots()
+        if config.PrintSlotsOnFinish then
+            printSlots()
+        end
         return false
     end
 
@@ -341,13 +353,13 @@ local function start()
                 state.lastUnitName = unit.name
                 state.lastUuid = unit.uuid
 
-                log(string.format("[EQUIP %03d] name=%s | uuid=%s | retry=%d/%d", state.attempted, tostring(unit.name), tostring(unit.uuid), retry, config.RetryPerUnit))
+                verboseLog(config, string.format("[EQUIP %03d] name=%s | uuid=%s | retry=%d/%d", state.attempted, tostring(unit.name), tostring(unit.uuid), retry, config.RetryPerUnit))
                 equipEvent:FireServer("Equip", unit.uuid)
 
                 verified, afterCount = waitForOccupiedIncrease(beforeCount, config)
                 if verified then
                     state.successful += 1
-                    log("[EQUIP-VERIFIED] name=" .. tostring(unit.name) .. " | uuid=" .. tostring(unit.uuid) .. " | occupiedAfter=" .. tostring(afterCount) .. "/" .. tostring(config.MaxSlots))
+                    verboseLog(config, "[EQUIP-VERIFIED] name=" .. tostring(unit.name) .. " | uuid=" .. tostring(unit.uuid) .. " | occupiedAfter=" .. tostring(afterCount) .. "/" .. tostring(config.MaxSlots))
                     break
                 end
             end
@@ -416,8 +428,6 @@ _G.AVStop = function()
 end
 
 log("loaded")
-log("start: _G.AVTeamEquipStart()")
-log("stop: _G.AVTeamEquipStop()")
 log("status: _G.AVTeamEquipStatus()")
 
 local initialConfig = getConfig()
