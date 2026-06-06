@@ -11,10 +11,12 @@ local BASE_URL = "https://raw.githubusercontent.com/Pexchzq/Anime-Vanguards-Runt
 
 local RUNTIME_FILES = {
     "MACRO-BRAIN.lua",
+    "AV-EYES-INVENTORY.lua",
     "MAP-MACRO-CONFIG.lua",
     "AV-CONTROLLER-CONFIG.lua",
     "MACRO-READER.lua",
     "AV-MACRO-CONTROLLER.lua",
+    "AV-TEAM-EQUIP-CONTROLLER.lua",
 }
 
 local function log(message)
