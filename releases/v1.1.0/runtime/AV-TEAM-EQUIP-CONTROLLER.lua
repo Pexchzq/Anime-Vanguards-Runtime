@@ -53,11 +53,6 @@ while not player do
     player = Players.LocalPlayer
 end
 
-local equipEvent = ReplicatedStorage
-    :WaitForChild("Networking")
-    :WaitForChild("Units")
-    :WaitForChild("EquipEvent")
-
 local state = {
     running = false,
     stopRequested = false,
@@ -74,6 +69,12 @@ local previousAVStop = rawget(_G, "AVStop")
 
 local function log(message)
     print("[Team] " .. tostring(message))
+end
+
+local function getEquipEvent()
+    local networking = ReplicatedStorage:FindFirstChild("Networking")
+    local units = networking and networking:FindFirstChild("Units")
+    return units and units:FindFirstChild("EquipEvent")
 end
 
 local function verboseLog(config, message)
@@ -352,6 +353,11 @@ local function start()
                 state.lastUuid = unit.uuid
 
                 verboseLog(config, string.format("[EQUIP %03d] name=%s | uuid=%s | retry=%d/%d", state.attempted, tostring(unit.name), tostring(unit.uuid), retry, config.RetryPerUnit))
+                local equipEvent = getEquipEvent()
+                if not equipEvent then
+                    finish("EquipEvent missing")
+                    return
+                end
                 equipEvent:FireServer("Equip", unit.uuid)
 
                 verified, afterCount = waitForOccupiedIncrease(beforeCount, config)
