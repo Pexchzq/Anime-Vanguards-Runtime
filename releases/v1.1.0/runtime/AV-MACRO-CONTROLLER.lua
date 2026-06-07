@@ -63,7 +63,7 @@ local lastActionAt = 0
 local actionCount = 0
 
 local function log(message)
-    print(string.format("[%s] %s", VERSION, tostring(message)))
+    print("[End] " .. tostring(message))
 end
 
 local function trimUpper(text)
@@ -348,8 +348,6 @@ _G.AVStop = function()
 end
 _G.AVMacroStop = _G.AVStop
 
-log("loaded | auto-start enabled")
-log("stop Brain+Reader+Controller: _G.AVStop()")
-log("status: _G.AVControllerStatus()")
+log("loaded")
 
 task.defer(start)
