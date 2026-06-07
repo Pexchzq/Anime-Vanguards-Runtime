@@ -63,6 +63,7 @@ local function loadRemoteFile(fileName)
 
     local executed, runtimeError = pcall(chunk)
     assert(executed, "Runtime failed: " .. fileName .. " | " .. tostring(runtimeError))
+    log("loaded ok " .. fileName)
 end
 
 local function waitForEyes()
@@ -96,20 +97,41 @@ local function startManagedControllers()
 
     if goalConfig.Enabled and goalConfig.AutoStart and type(_G.AVGoalControllerStart) == "function" then
         log("managed start: GoalComplete")
-        pcall(_G.AVGoalControllerStart)
+        local ok, err = pcall(_G.AVGoalControllerStart)
+        if not ok then
+            log("managed start failed: GoalComplete | " .. tostring(err))
+        end
         task.wait(STARTUP.BetweenControllerStartsSeconds)
+    else
+        log("managed skip: GoalComplete | enabled=" .. tostring(goalConfig.Enabled)
+            .. " | autoStart=" .. tostring(goalConfig.AutoStart)
+            .. " | fn=" .. tostring(type(_G.AVGoalControllerStart)))
     end
 
     if stageConfig.Enabled and stageConfig.AutoStart and type(_G.AVStageRouterStart) == "function" then
         log("managed start: StageRouter")
-        pcall(_G.AVStageRouterStart)
+        local ok, err = pcall(_G.AVStageRouterStart)
+        if not ok then
+            log("managed start failed: StageRouter | " .. tostring(err))
+        end
         task.wait(STARTUP.BetweenControllerStartsSeconds)
+    else
+        log("managed skip: StageRouter | enabled=" .. tostring(stageConfig.Enabled)
+            .. " | autoStart=" .. tostring(stageConfig.AutoStart)
+            .. " | fn=" .. tostring(type(_G.AVStageRouterStart)))
     end
 
     if teamConfig.Enabled and teamConfig.AutoStart and type(_G.AVTeamEquipStart) == "function" then
         log("managed start: TeamEquip")
-        pcall(_G.AVTeamEquipStart)
+        local ok, err = pcall(_G.AVTeamEquipStart)
+        if not ok then
+            log("managed start failed: TeamEquip | " .. tostring(err))
+        end
         task.wait(STARTUP.BetweenControllerStartsSeconds)
+    else
+        log("managed skip: TeamEquip | enabled=" .. tostring(teamConfig.Enabled)
+            .. " | autoStart=" .. tostring(teamConfig.AutoStart)
+            .. " | fn=" .. tostring(type(_G.AVTeamEquipStart)))
     end
 end
 
@@ -180,7 +202,7 @@ task.wait(STARTUP.BeforeControllersSeconds)
 local originalAutoStart = suppressControllerAutoStart()
 
 for _, fileName in ipairs(CONTROLLER_FILES) do
-    loadRemoteFile(fileName)
+    optionalLoad(fileName)
     task.wait(0.5)
 end
 
