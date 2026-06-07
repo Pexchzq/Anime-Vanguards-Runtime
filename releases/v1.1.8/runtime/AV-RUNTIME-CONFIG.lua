@@ -197,14 +197,14 @@ local StageRouterConfig = {
         {
             Name = "Story Stage11 before level 30",
             Enabled = true,
-            When = { MaxLevel = 30 },
+            When = { MaxLevel = 10 },
             Match = {
                 -- ค่าด้านล่างคือ payload ที่จะส่งเข้า LobbyEvent เพื่อสร้าง/เริ่มด่าน
                 -- แก้ Difficulty / Act / StageType / Stage ให้ตรงกับด่านที่ต้องการ
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
-                Stage = "Stage11",
+                Stage = "Stage12",
                 FriendsOnly = false,
             },
         },
@@ -214,13 +214,13 @@ local StageRouterConfig = {
         {
             Name = "Story Stage12 from level 30",
             Enabled = true,
-            When = { MinLevel = 30 },
+            When = { MinLevel = 10 },
             Match = {
                 -- ถ้าอยากเปลี่ยนให้เล่นด่านอื่นหลังเลเวลถึงเป้า ให้แก้ block นี้
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
-                Stage = "Stage12",
+                Stage = "Stage1",
                 FriendsOnly = false,
             },
         },
