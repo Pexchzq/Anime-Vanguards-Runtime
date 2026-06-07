@@ -1,4 +1,4 @@
---[[
+﻿--[[
     ANIME VANGUARDS MACRO SYSTEM BOOTSTRAP
     RELEASE: v1.1.8
 
@@ -11,7 +11,7 @@
 ]]
 
 local RELEASE = "v1.1.8"
-local RUNTIME_RELEASE = "v1.1.0"
+local RUNTIME_RELEASE = RELEASE
 local CACHE_BUST = "unified-config-settings-lazy-remotes-v118"
 local BASE_URL = "https://raw.githubusercontent.com/Pexchzq/Anime-Vanguards-Runtime/main/releases/" .. RUNTIME_RELEASE .. "/runtime/"
 
@@ -243,3 +243,4 @@ for _, fileName in ipairs(OPTIONAL_FILES) do
 end
 
 log("system loaded")
+
