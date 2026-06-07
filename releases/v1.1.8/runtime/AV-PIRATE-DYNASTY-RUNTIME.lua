@@ -38,6 +38,8 @@ local DEFAULT_CONFIG = {
     WaitForRuntimeSeconds = 20,
     WaitForRunesSeconds = 6,
     WaitForVoteSeconds = 20,
+    VoteCooldownSeconds = 3.5,
+    SupervisorTickSeconds = 1.0,
     StartCombatAfterMatch = true,
     QuietCombatDumps = true,
 }
@@ -155,10 +157,26 @@ local function getInterfaceEvent()
     return networking and networking:FindFirstChild("InterfaceEvent")
 end
 
+local function getMatchRestartSettingEvent()
+    local networking = ReplicatedStorage:FindFirstChild("Networking")
+    return networking and networking:FindFirstChild("MatchRestartSettingEvent")
+end
+
 local function fireInterface(payload)
     local event = getInterfaceEvent()
     if not event then return false, "ReplicatedStorage.Networking.InterfaceEvent missing" end
     event:FireServer("PirateDynastySelect", payload)
+    return true
+end
+
+local function voteRestart()
+    local event = getMatchRestartSettingEvent()
+    if not event then
+        state.reason = "MatchRestartSettingEvent missing"
+        warnLog(state.reason)
+        return false
+    end
+    event:FireServer("Vote")
     return true
 end
 
@@ -1647,7 +1665,7 @@ local function runPreMatch(token)
     if not state.runesReady then
         state.reason = "runes missing; started easy only"
         if config.StartCombatAfterMatch then task.wait(2); startCombat() end
-        return
+        return "easy"
     end
 
     state.phase = "MODIFIER"
@@ -1657,11 +1675,15 @@ local function runPreMatch(token)
         fireInterface({ Modifier = targetModifier })
         state.reason = "modifier selected"
         log("modifier selected=" .. tostring(targetModifier))
+        if config.StartCombatAfterMatch then task.wait(1); startCombat() end
+        return "combat"
     else
-        state.reason = "modifier not found; continuing"
+        state.reason = "modifier not found; voting restart"
         log(state.reason)
+        voteRestart()
+        task.wait(config.VoteCooldownSeconds)
+        return "retry"
     end
-    if config.StartCombatAfterMatch then task.wait(1); startCombat() end
 end
 
 local function start()
@@ -1683,17 +1705,35 @@ local function start()
             warnLog(state.reason)
             return
         end
+
         state.runtimeSource = source
         state.reason = "runtime confirmed"
         log("runtime confirmed | source=" .. tostring(source))
-        readDynastyLevel()
-        log("dynastyLevel=" .. tostring(state.dynastyLevel or "<missing>") .. " | text=" .. tostring(state.dynastyLevelText))
-        if isCombatRuntimeLoaded() then
-            state.reason = "combat runtime exists"
-            startCombat()
-            return
+
+        while isCurrent(token) do
+            readDynastyLevel()
+
+            if isCombatRuntimeLoaded() then
+                if not state.combatStarted then
+                    state.reason = "combat runtime exists"
+                    startCombat()
+                end
+                task.wait(config.SupervisorTickSeconds)
+            else
+                if state.combatStarted then
+                    stopCombatOnly()
+                end
+                local result = runPreMatch(token)
+                if result == "retry" then
+                    -- Keep looping like the original script until the target modifier appears.
+                    task.wait(config.SupervisorTickSeconds)
+                elseif result == "combat" or result == "easy" then
+                    task.wait(config.SupervisorTickSeconds)
+                else
+                    task.wait(config.SupervisorTickSeconds)
+                end
+            end
         end
-        runPreMatch(token)
     end)
     return state
 end
