@@ -70,13 +70,17 @@ local brainWarningLogged = false
 local MAX_BRAIN_SNAPSHOT_AGE = 3.5
 local lastRunResult = "idle"
 
-local unitEvent = ReplicatedStorage:WaitForChild("Networking"):WaitForChild("UnitEvent")
 local loadMacro = nil
 local macroSourceLabel = nil
 local readBrainSnapshot = nil
 
 local function log(message)
     print("[Reader] " .. tostring(message))
+end
+
+local function getUnitEvent()
+    local networking = ReplicatedStorage:FindFirstChild("Networking")
+    return networking and networking:FindFirstChild("UnitEvent")
 end
 
 local function isGuidLike(text)
@@ -255,7 +259,11 @@ local function connectUnitObserver()
     table.clear(knownGuids)
     table.clear(newUnitQueue)
 
-    local units = Workspace:WaitForChild("Units")
+    local units = Workspace:FindFirstChild("Units")
+    if not units then
+        log("unit observer waiting | reason=Workspace.Units missing")
+        return false
+    end
     for _, child in ipairs(units:GetChildren()) do
         if child:IsA("Model") and isGuidLike(child.Name) then
             knownGuids[child.Name] = true
@@ -272,6 +280,8 @@ local function connectUnitObserver()
             end
         end
     end)
+
+    return true
 end
 
 local function buildRenderPayload(step)
@@ -313,6 +323,10 @@ local function requestRender(step)
         log("REMOTE Render options=" .. dumpTable(options))
     end
 
+    local unitEvent = getUnitEvent()
+    if not unitEvent then
+        error("UnitEvent missing")
+    end
     unitEvent:FireServer("Render", payload, options)
 end
 
@@ -322,6 +336,10 @@ local function requestUpgrade(runtime)
         log("REMOTE Upgrade guid=" .. tostring(runtime.runtimeGuid))
     end
 
+    local unitEvent = getUnitEvent()
+    if not unitEvent then
+        error("UnitEvent missing")
+    end
     unitEvent:FireServer("Upgrade", runtime.runtimeGuid)
 end
 
@@ -915,11 +933,14 @@ local function runMacro(source)
     runtimeByPlacementOrder = {}
     lastUpgradeByGuid = {}
     disconnectAllUpgradeObservers()
-    connectUnitObserver()
 
     log(string.format("started | source=%s | steps=%d", macroSourceLabel(source), #macro))
 
     task.spawn(function()
+        while not stopRequested and not connectUnitObserver() do
+            task.wait(ACTION_RETRY_INTERVAL)
+        end
+
         for index, step in ipairs(macro) do
             if stopRequested then
                 log("stopped by request")
