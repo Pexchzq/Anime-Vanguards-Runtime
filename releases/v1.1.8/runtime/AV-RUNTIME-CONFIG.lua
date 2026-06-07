@@ -235,7 +235,7 @@ local StageRouterConfig = {
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
-                Stage = "Stage11",
+                Stage = "Stage12",
                 FriendsOnly = false,
             },
         },
