@@ -259,9 +259,10 @@ local StageRouterConfig = {
             When = { MinLevel = 50 },
             Mode = "PirateDynasty",
             PirateDynastyEntry = {
-                RemoteConfigured = false,
-                RemoteName = "InterfaceEvent",
-                RemoteAction = "PirateDynastySelect",
+                RemoteConfigured = true,
+                RemoteName = "PirateDynasty.Teleport",
+                RemoteAction = "Create",
+                StartMatchAfterCreate = true,
                 Payload = nil,
             },
         },
