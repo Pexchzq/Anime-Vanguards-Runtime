@@ -39,10 +39,6 @@ while not player do
     player = Players.LocalPlayer
 end
 
-local lobbyEvent = ReplicatedStorage
-    :WaitForChild("Networking")
-    :WaitForChild("LobbyEvent")
-
 local state = {
     running = false,
     stopRequested = false,
@@ -57,6 +53,11 @@ local previousAVStop = rawget(_G, "AVStop")
 
 local function log(message)
     print("[Stage] " .. tostring(message))
+end
+
+local function getLobbyEvent()
+    local networking = ReplicatedStorage:FindFirstChild("Networking")
+    return networking and networking:FindFirstChild("LobbyEvent")
 end
 
 local function verboseLog(config, message)
@@ -187,6 +188,13 @@ local function fireSelectedMatch(config, rule, level)
     state.lastAction = "AddMatch"
 
     log("selected | level=" .. tostring(level) .. " | rule=" .. tostring(rule.Name) .. " | " .. serializeMatch(matchConfig))
+    local lobbyEvent = getLobbyEvent()
+    if not lobbyEvent then
+        state.reason = "LobbyEvent missing"
+        log("waiting | reason=LobbyEvent missing")
+        return false
+    end
+
     log("fire AddMatch")
     lobbyEvent:FireServer("AddMatch", matchConfig)
 
@@ -200,6 +208,13 @@ local function fireSelectedMatch(config, rule, level)
     end
 
     state.lastAction = "StartMatch"
+    local lobbyEvent = getLobbyEvent()
+    if not lobbyEvent then
+        state.reason = "LobbyEvent missing"
+        log("waiting | reason=LobbyEvent missing")
+        return false
+    end
+
     log("fire StartMatch")
     lobbyEvent:FireServer("StartMatch")
 
