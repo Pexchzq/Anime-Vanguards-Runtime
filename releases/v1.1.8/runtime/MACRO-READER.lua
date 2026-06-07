@@ -30,8 +30,8 @@ local player = Players.LocalPlayer
 local VERSION = "MACRO-READER V0.3 - CACHED-BRAIN"
 local DEFAULT_MACRO_FILE = "C:/Users/Siwakan Talasak/AppData/Local/Potassium/workspace/macro_1780459527.lua"
 local DEFAULT_MACRO_URL = ""
--- Fallback only. For portability, run MAP-MACRO-CONFIG first so it sets _G.AVMacroConfig.
-local DEFAULT_MAP_MACRO_CONFIG = "C:/Users/Siwakan Talasak/OneDrive/Desktop/anime vanguards/config/MAP-MACRO-CONFIG V1.0.lua"
+-- Fallback only. Prefer the unified runtime config so _G.AVMacroConfig is populated there.
+local DEFAULT_MAP_MACRO_CONFIG = "C:/Users/Siwakan Talasak/OneDrive/Desktop/anime vanguards/config/AV-RUNTIME-CONFIG V1.0.lua"
 local DEFAULT_MAP_NAME = "UNKNOWN_MAP"
 
 -- No automatic timeout:
