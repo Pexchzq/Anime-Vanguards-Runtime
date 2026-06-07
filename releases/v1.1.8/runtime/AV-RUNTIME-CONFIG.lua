@@ -175,7 +175,8 @@ local ControllerConfig = {
 
     PirateDynasty = {
         Enabled = true,
-        AutoStart = false, -- StageRouter starts this after Pirate Dynasty runtime is verified.
+        AutoStart = true, -- Starts only after Pirate Dynasty runtime is verified.
+        AutoDetectRuntime = true,
 
         CharacterId = "ElasticCaptainPirate",
         CharacterDisplayName = "Elastic Captain (Cog 4th)",
@@ -195,6 +196,7 @@ local ControllerConfig = {
         TargetModifier = "Floodgates",
 
         WaitForRuntimeSeconds = 20,
+        AutoDetectPollSeconds = 1.0,
         WaitForRunesSeconds = 6,
         WaitForVoteSeconds = 20,
         RemoteDelaySeconds = 0.5,
