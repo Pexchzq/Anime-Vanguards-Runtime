@@ -75,6 +75,6 @@ local config = {
 }
 
 _G.AVMacroConfig = config
-print("[MAP-MACRO-CONFIG V1.2] loaded into _G.AVMacroConfig | sources=" .. tostring(#MacroSources))
+print("[Config] macro sources loaded | sources=" .. tostring(#MacroSources))
 
 return config
