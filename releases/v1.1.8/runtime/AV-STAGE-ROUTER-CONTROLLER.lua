@@ -65,6 +65,12 @@ local function getInterfaceEvent()
     return networking and networking:FindFirstChild("InterfaceEvent")
 end
 
+local function getPirateDynastyTeleportEvent()
+    local networking = ReplicatedStorage:FindFirstChild("Networking")
+    local pirateDynasty = networking and networking:FindFirstChild("PirateDynasty")
+    return pirateDynasty and pirateDynasty:FindFirstChild("Teleport")
+end
+
 local function verboseLog(config, message)
     if config.Verbose then
         log(message)
@@ -255,22 +261,54 @@ local function firePirateDynastyEntry(config, rule, level)
         return false, state.reason
     end
 
-    if type(entry.Payload) ~= "table" then
-        state.reason = "pirate dynasty entry payload missing"
-        log("waiting | reason=pirate dynasty entry payload missing")
-        return false, state.reason
-    end
-
-    local interfaceEvent = getInterfaceEvent()
-    if not interfaceEvent then
-        state.reason = "InterfaceEvent missing"
-        log("waiting | reason=InterfaceEvent missing")
-        return false, state.reason
-    end
-
     local action = entry.RemoteAction or "PirateDynastySelect"
-    log("fire PirateDynastyEntry | action=" .. tostring(action))
-    interfaceEvent:FireServer(action, cloneMap(entry.Payload))
+    local remoteName = entry.RemoteName or "InterfaceEvent"
+
+    if remoteName == "PirateDynasty.Teleport" then
+        local teleportEvent = getPirateDynastyTeleportEvent()
+        if not teleportEvent then
+            state.reason = "PirateDynasty.Teleport missing"
+            log("waiting | reason=PirateDynasty.Teleport missing")
+            return false, state.reason
+        end
+
+        log("fire PirateDynastyEntry | remote=PirateDynasty.Teleport | action=" .. tostring(action))
+        teleportEvent:FireServer(action)
+
+        task.wait(config.DelayBetweenRemotesSeconds)
+        if state.stopRequested then
+            return false, "manual stop"
+        end
+
+        if entry.StartMatchAfterCreate ~= false then
+            local lobbyEvent = getLobbyEvent()
+            if not lobbyEvent then
+                state.reason = "LobbyEvent missing"
+                log("waiting | reason=LobbyEvent missing")
+                return false, state.reason
+            end
+
+            state.lastAction = "PirateDynastyStartMatch"
+            log("fire StartMatch")
+            lobbyEvent:FireServer("StartMatch")
+        end
+    else
+        if type(entry.Payload) ~= "table" then
+            state.reason = "pirate dynasty entry payload missing"
+            log("waiting | reason=pirate dynasty entry payload missing")
+            return false, state.reason
+        end
+
+        local interfaceEvent = getInterfaceEvent()
+        if not interfaceEvent then
+            state.reason = "InterfaceEvent missing"
+            log("waiting | reason=InterfaceEvent missing")
+            return false, state.reason
+        end
+
+        log("fire PirateDynastyEntry | remote=InterfaceEvent | action=" .. tostring(action))
+        interfaceEvent:FireServer(action, cloneMap(entry.Payload))
+    end
 
     local verified, verifySource = waitForPirateDynastyRuntime(config)
     if not verified then
