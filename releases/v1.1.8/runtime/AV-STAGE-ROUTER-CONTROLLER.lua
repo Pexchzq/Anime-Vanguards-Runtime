@@ -60,6 +60,11 @@ local function getLobbyEvent()
     return networking and networking:FindFirstChild("LobbyEvent")
 end
 
+local function getInterfaceEvent()
+    local networking = ReplicatedStorage:FindFirstChild("Networking")
+    return networking and networking:FindFirstChild("InterfaceEvent")
+end
+
 local function verboseLog(config, message)
     if config.Verbose then
         log(message)
@@ -110,6 +115,21 @@ local function runtimeRootsExist()
         or Workspace:FindFirstChild("Units") ~= nil
 end
 
+local function pirateDynastyRuntimeExists()
+    local playerGui = player and player:FindFirstChild("PlayerGui")
+    local hud = playerGui and playerGui:FindFirstChild("PirateDynastyHUD")
+    if hud then
+        return true, "PlayerGui.PirateDynastyHUD"
+    end
+
+    local entities = Workspace:FindFirstChild("Entities")
+    if entities and entities:FindFirstChild("PirateDynasty") then
+        return true, "Workspace.Entities.PirateDynasty"
+    end
+
+    return false, "<none>"
+end
+
 local function readLevel()
     local value = player:GetAttribute("Level")
     if typeof(value) == "number" then
@@ -155,6 +175,19 @@ local function serializeMatch(match)
         .. " | Stage=" .. tostring(match.Stage)
 end
 
+local function serializeRule(rule)
+    if type(rule) ~= "table" then
+        return "<none>"
+    end
+
+    if rule.Mode == "PirateDynasty" then
+        local entry = type(rule.PirateDynastyEntry) == "table" and rule.PirateDynastyEntry or {}
+        return "Mode=PirateDynasty | remoteConfigured=" .. tostring(entry.RemoteConfigured == true)
+    end
+
+    return serializeMatch(rule.Match)
+end
+
 local function printDecision()
     local config = getConfig()
     local rule, level = resolveRule(config)
@@ -164,7 +197,7 @@ local function printDecision()
         return
     end
 
-    log("decision | level=" .. tostring(level) .. " | rule=" .. tostring(rule.Name) .. " | " .. serializeMatch(rule.Match))
+    log("decision | level=" .. tostring(level) .. " | rule=" .. tostring(rule.Name) .. " | " .. serializeRule(rule))
 end
 
 local function waitForMatchRuntime(config)
@@ -180,7 +213,88 @@ local function waitForMatchRuntime(config)
     return false
 end
 
+local function waitForPirateDynastyRuntime(config)
+    local deadline = os.clock() + config.VerifyTimeoutSeconds
+
+    while state.running and not state.stopRequested and os.clock() < deadline do
+        local exists, source = pirateDynastyRuntimeExists()
+        if exists then
+            return true, source
+        end
+        task.wait(1)
+    end
+
+    return false, "pirate dynasty runtime not detected"
+end
+
+local function firePirateDynastyEntry(config, rule, level)
+    local entry = type(rule.PirateDynastyEntry) == "table" and rule.PirateDynastyEntry or {}
+    state.lastLevel = level
+    state.lastRuleName = rule.Name
+    state.lastMatch = nil
+    state.lastAction = "PirateDynastyEntry"
+
+    log("selected | level=" .. tostring(level) .. " | rule=" .. tostring(rule.Name) .. " | Mode=PirateDynasty")
+
+    local exists, source = pirateDynastyRuntimeExists()
+    if exists then
+        log("pirate runtime detected | source=" .. tostring(source))
+        if type(_G.AVPirateDynastyStart) == "function" then
+            local ok, err = pcall(_G.AVPirateDynastyStart)
+            if not ok then
+                return false, "pirate controller start failed: " .. tostring(err)
+            end
+            return true, "pirate controller started"
+        end
+        return false, "PirateDynastyController missing"
+    end
+
+    if entry.RemoteConfigured ~= true then
+        state.reason = "pirate dynasty entry remote not configured"
+        log("waiting | reason=pirate dynasty entry remote not configured")
+        return false, state.reason
+    end
+
+    if type(entry.Payload) ~= "table" then
+        state.reason = "pirate dynasty entry payload missing"
+        log("waiting | reason=pirate dynasty entry payload missing")
+        return false, state.reason
+    end
+
+    local interfaceEvent = getInterfaceEvent()
+    if not interfaceEvent then
+        state.reason = "InterfaceEvent missing"
+        log("waiting | reason=InterfaceEvent missing")
+        return false, state.reason
+    end
+
+    local action = entry.RemoteAction or "PirateDynastySelect"
+    log("fire PirateDynastyEntry | action=" .. tostring(action))
+    interfaceEvent:FireServer(action, cloneMap(entry.Payload))
+
+    local verified, verifySource = waitForPirateDynastyRuntime(config)
+    if not verified then
+        return false, verifySource
+    end
+
+    log("pirate runtime detected | source=" .. tostring(verifySource))
+    if type(_G.AVPirateDynastyStart) ~= "function" then
+        return false, "PirateDynastyController missing"
+    end
+
+    local ok, err = pcall(_G.AVPirateDynastyStart)
+    if not ok then
+        return false, "pirate controller start failed: " .. tostring(err)
+    end
+
+    return true, "pirate controller started"
+end
+
 local function fireSelectedMatch(config, rule, level)
+    if rule.Mode == "PirateDynasty" then
+        return firePirateDynastyEntry(config, rule, level)
+    end
+
     local matchConfig = cloneMap(rule.Match)
     state.lastLevel = level
     state.lastRuleName = rule.Name
