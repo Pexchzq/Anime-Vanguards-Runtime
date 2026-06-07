@@ -152,11 +152,16 @@ local StageRouterConfig = {
     Verbose = false,
 
     Rules = {
+        -- กติกาเลือกด่านข้อที่ 1:
+        -- ใช้เมื่อเลเวลผู้เล่น "น้อยกว่า 30"
+        -- เพราะ MaxLevel = 30 หมายถึง level < 30 ไม่รวม 30
         {
             Name = "Story Stage11 before level 30",
             Enabled = true,
             When = { MaxLevel = 30 },
             Match = {
+                -- ค่าด้านล่างคือ payload ที่จะส่งเข้า LobbyEvent เพื่อสร้าง/เริ่มด่าน
+                -- แก้ Difficulty / Act / StageType / Stage ให้ตรงกับด่านที่ต้องการ
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
@@ -164,11 +169,15 @@ local StageRouterConfig = {
                 FriendsOnly = false,
             },
         },
+        -- กติกาเลือกด่านข้อที่ 2:
+        -- ใช้เมื่อเลเวลผู้เล่น "ตั้งแต่ 30 ขึ้นไป"
+        -- เพราะ MinLevel = 30 หมายถึง level >= 30
         {
             Name = "Story Stage12 from level 30",
             Enabled = true,
             When = { MinLevel = 30 },
             Match = {
+                -- ถ้าอยากเปลี่ยนให้เล่นด่านอื่นหลังเลเวลถึงเป้า ให้แก้ block นี้
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
