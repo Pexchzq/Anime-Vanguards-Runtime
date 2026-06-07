@@ -12,7 +12,7 @@
 
 local RELEASE = "v1.1.8"
 local RUNTIME_RELEASE = RELEASE
-local CACHE_BUST = "pirate-dynasty-flow-v118"
+local CACHE_BUST = "pirate-standalone-runtime-v118"
 local BASE_URL = "https://raw.githubusercontent.com/Pexchzq/Anime-Vanguards-Runtime/main/releases/" .. RUNTIME_RELEASE .. "/runtime/"
 
 local STARTUP = {
@@ -36,7 +36,6 @@ local CONFIG_FILES = {
 local CONTROLLER_FILES = {
     "AV-SETTINGS-APPLIER-CONTROLLER.lua",
     "AV-GOAL-COMPLETE-CONTROLLER.lua",
-    "AV-PIRATE-DYNASTY-CONTROLLER.lua",
     "AV-STAGE-ROUTER-CONTROLLER.lua",
     "AV-TEAM-EQUIP-CONTROLLER.lua",
 }
@@ -103,6 +102,27 @@ local function optionalLoad(fileName)
     if not ok then
         log("optional load failed: " .. fileName .. " | " .. tostring(errorMessage))
     end
+end
+
+local function isPirateDynastyRuntime()
+    if game.PlaceId == 16277809958 then
+        return true, "PirateDynasty PlaceId"
+    end
+
+    local players = game:GetService("Players")
+    local localPlayer = players.LocalPlayer
+    local playerGui = localPlayer and localPlayer:FindFirstChild("PlayerGui")
+    if playerGui and playerGui:FindFirstChild("PirateDynastyHUD") then
+        return true, "PlayerGui.PirateDynastyHUD"
+    end
+
+    local workspace = game:GetService("Workspace")
+    local entities = workspace:FindFirstChild("Entities")
+    if entities and entities:FindFirstChild("PirateDynasty") then
+        return true, "Workspace.Entities.PirateDynasty"
+    end
+
+    return false, "not pirate dynasty"
 end
 
 local function startManagedControllers()
@@ -216,6 +236,14 @@ if type(_G.AVStop) == "function" then
 end
 
 _G.AVBootstrapManagedStartup = true
+
+local inPirateDynasty, pirateSource = isPirateDynastyRuntime()
+if inPirateDynasty then
+    log("pirate mode detected | source=" .. tostring(pirateSource))
+    loadRemoteFile("AV-PIRATE-DYNASTY-RUNTIME.lua")
+    log("pirate runtime loaded only")
+    return
+end
 
 loadRemoteFile(PRELOAD_FILES[1])
 task.wait(STARTUP.AfterBrainSeconds)
