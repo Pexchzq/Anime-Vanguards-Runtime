@@ -56,7 +56,7 @@ local state = {
 local previousAVStop = rawget(_G, "AVStop")
 
 local function log(message)
-    print("[" .. VERSION .. "] " .. tostring(message))
+    print("[Stage] " .. tostring(message))
 end
 
 local function verboseLog(config, message)
@@ -186,7 +186,8 @@ local function fireSelectedMatch(config, rule, level)
     state.lastMatch = matchConfig
     state.lastAction = "AddMatch"
 
-    log("start match | level=" .. tostring(level) .. " | rule=" .. tostring(rule.Name) .. " | " .. serializeMatch(matchConfig))
+    log("selected | level=" .. tostring(level) .. " | rule=" .. tostring(rule.Name) .. " | " .. serializeMatch(matchConfig))
+    log("fire AddMatch")
     lobbyEvent:FireServer("AddMatch", matchConfig)
 
     task.wait(config.DelayBetweenRemotesSeconds)
@@ -199,10 +200,11 @@ local function fireSelectedMatch(config, rule, level)
     end
 
     state.lastAction = "StartMatch"
-    verboseLog(config, 'remote: LobbyEvent:FireServer("StartMatch")')
+    log("fire StartMatch")
     lobbyEvent:FireServer("StartMatch")
 
     if waitForMatchRuntime(config) then
+        log("match detected")
         return true, "match runtime detected"
     end
 
@@ -306,9 +308,8 @@ _G.AVStop = function()
 end
 
 log("loaded")
-log("status: _G.AVStageRouterStatus()")
 
 local initialConfig = getConfig()
-if initialConfig.Enabled and initialConfig.AutoStart then
+if initialConfig.Enabled and initialConfig.AutoStart and not rawget(_G, "AVBootstrapManagedStartup") then
     start()
 end
