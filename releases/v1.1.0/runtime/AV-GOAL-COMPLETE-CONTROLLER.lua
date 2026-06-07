@@ -36,9 +36,6 @@ local DEFAULT_CONFIG = {
     Verbose = false,
 }
 
-local networking = ReplicatedStorage:WaitForChild("Networking")
-local teleportEvent = networking:WaitForChild("TeleportEvent")
-
 local state = {
     running = false,
     stopRequested = false,
@@ -53,6 +50,14 @@ local previousAVStop = rawget(_G, "AVStop")
 
 local function log(message)
     print("[Goal] " .. tostring(message))
+end
+
+local function getTeleportEvent()
+    local networking = ReplicatedStorage:FindFirstChild("Networking")
+    if not networking then
+        return nil
+    end
+    return networking:FindFirstChild("TeleportEvent")
 end
 
 local function cloneMap(value)
@@ -186,6 +191,14 @@ local function fireAction(config, reason)
             state.stopRequested = true
             state.pending = false
             log("goal handled | action=Stop | reason=" .. tostring(latestReason or reason))
+            return
+        end
+
+        local teleportEvent = getTeleportEvent()
+        if not teleportEvent then
+            state.pending = false
+            state.lastReason = "TeleportEvent missing"
+            log("waiting | reason=TeleportEvent missing")
             return
         end
 
