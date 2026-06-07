@@ -200,7 +200,7 @@ local ControllerConfig = {
         WaitForRunesSeconds = 6,
         WaitForVoteSeconds = 20,
         RemoteDelaySeconds = 0.5,
-        StartCombatAfterMatch = false,
+        StartCombatAfterMatch = true,
         Verbose = false,
     },
 }
