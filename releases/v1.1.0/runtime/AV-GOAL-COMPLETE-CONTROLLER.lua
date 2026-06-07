@@ -52,7 +52,7 @@ local state = {
 local previousAVStop = rawget(_G, "AVStop")
 
 local function log(message)
-    print("[" .. VERSION .. "] " .. tostring(message))
+    print("[Goal] " .. tostring(message))
 end
 
 local function cloneMap(value)
@@ -293,8 +293,6 @@ _G.AVStop = function()
 end
 
 log("loaded")
-log("goal complete: _G.AVSetGoalComplete(\"reason\")")
-log("status: _G.AVGoalControllerStatus()")
 
 local initialConfig = getConfig()
 if initialConfig.Enabled and initialConfig.AutoStart and not rawget(_G, "AVBootstrapManagedStartup") then
