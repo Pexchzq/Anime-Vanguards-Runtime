@@ -162,9 +162,9 @@ local ControllerConfig = {
             Graphics = {
                 LowDetailMode = true,
                 DisableDamageIndicators = true,
-                DisableCameraShake = false,
-                HideOthersUnits = false,
-                DisableVisualEffects = false,
+                DisableCameraShake = true,
+                HideOthersUnits = true,
+                DisableVisualEffects = true,
             },
             Audio = {
                 -- ยังไม่รองรับ number/string เช่น GameVolume/MusicVolume
