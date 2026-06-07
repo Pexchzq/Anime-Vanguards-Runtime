@@ -133,6 +133,45 @@ local ControllerConfig = {
         Verbose = false,
         PrintSlotsOnFinish = false,
     },
+
+    SettingsApplier = {
+        -- เปิดใช้ตัวปรับ Settings ตอนระบบเริ่ม
+        -- ตัวนี้ทำงานครั้งเดียวต่อ JobId แล้วหยุดเอง ไม่ควรวนตลอด
+        Enabled = true,
+        AutoStart = true,
+        RetrySeconds = 2,
+        MaxWaitSeconds = 20,
+        ApplyOncePerJob = true,
+        VerifyDelaySeconds = 0.75,
+        ToggleDelaySeconds = 0.12,
+        RequestTimeoutSeconds = 8,
+        Verbose = false,
+
+        -- ใส่ settings ที่ต้องการตรงนี้
+        -- ตอนนี้ยืนยัน remote เฉพาะ boolean ระดับบนเท่านั้น
+        -- ค่าที่เป็น table ซ้อนลึกจะถูก report เป็น unsupported เพื่อกันยิง remote ผิด
+        Config = {
+            Gameplay = {
+                AutoSkipStart = true,
+                DisableMatchEndRewardsView = true,
+                AutoSkipWaves = true,
+                ShowMaxRangeOnPlacement = true,
+                AutoUpgradeDuringPlacement = true,
+                SelectUnitOnPlacement = true,
+            },
+            Graphics = {
+                LowDetailMode = true,
+                DisableDamageIndicators = true,
+                DisableCameraShake = false,
+                HideOthersUnits = false,
+                DisableVisualEffects = false,
+            },
+            Audio = {
+                -- ยังไม่รองรับ number/string เช่น GameVolume/MusicVolume
+                -- ต้อง path-test remote format เพิ่มก่อน
+            },
+        },
+    },
 }
 
 -- =========================================================
@@ -165,7 +204,7 @@ local StageRouterConfig = {
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
-                Stage = "Stage12",
+                Stage = "Stage11",
                 FriendsOnly = false,
             },
         },
@@ -181,7 +220,7 @@ local StageRouterConfig = {
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
-                Stage = "Stage1",
+                Stage = "Stage12",
                 FriendsOnly = false,
             },
         },
