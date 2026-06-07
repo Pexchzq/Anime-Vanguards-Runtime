@@ -49,10 +49,6 @@ local VALID_ACTIONS = {
     Stop = true,
 }
 
-local networking = ReplicatedStorage:WaitForChild("Networking")
-local endScreenVoteEvent = networking:WaitForChild("EndScreen"):WaitForChild("VoteEvent")
-local teleportEvent = networking:WaitForChild("TeleportEvent")
-
 local running = false
 local stopRequested = false
 local scanThread = nil
@@ -64,6 +60,21 @@ local actionCount = 0
 
 local function log(message)
     print("[End] " .. tostring(message))
+end
+
+local function getNetworking()
+    return ReplicatedStorage:FindFirstChild("Networking")
+end
+
+local function getEndScreenVoteEvent()
+    local networking = getNetworking()
+    local endScreen = networking and networking:FindFirstChild("EndScreen")
+    return endScreen and endScreen:FindFirstChild("VoteEvent")
+end
+
+local function getTeleportEvent()
+    local networking = getNetworking()
+    return networking and networking:FindFirstChild("TeleportEvent")
 end
 
 local function trimUpper(text)
@@ -169,10 +180,22 @@ end
 local function fireAction(action)
     action = tostring(action or "")
     if action == "Retry" then
+        local endScreenVoteEvent = getEndScreenVoteEvent()
+        if not endScreenVoteEvent then
+            return false, "EndScreen.VoteEvent missing"
+        end
         endScreenVoteEvent:FireServer("Retry")
     elseif action == "Next" then
+        local endScreenVoteEvent = getEndScreenVoteEvent()
+        if not endScreenVoteEvent then
+            return false, "EndScreen.VoteEvent missing"
+        end
         endScreenVoteEvent:FireServer("Next")
     elseif action == "Lobby" then
+        local teleportEvent = getTeleportEvent()
+        if not teleportEvent then
+            return false, "TeleportEvent missing"
+        end
         teleportEvent:FireServer("Lobby")
     elseif action == "Stop" then
         log("policy action Stop; no remote fired")
