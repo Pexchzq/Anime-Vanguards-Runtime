@@ -12,7 +12,7 @@
 
 local RELEASE = "v1.1.8"
 local RUNTIME_RELEASE = RELEASE
-local CACHE_BUST = "unified-config-settings-lazy-remotes-v118"
+local CACHE_BUST = "pirate-dynasty-flow-v118"
 local BASE_URL = "https://raw.githubusercontent.com/Pexchzq/Anime-Vanguards-Runtime/main/releases/" .. RUNTIME_RELEASE .. "/runtime/"
 
 local STARTUP = {
@@ -36,6 +36,7 @@ local CONFIG_FILES = {
 local CONTROLLER_FILES = {
     "AV-SETTINGS-APPLIER-CONTROLLER.lua",
     "AV-GOAL-COMPLETE-CONTROLLER.lua",
+    "AV-PIRATE-DYNASTY-CONTROLLER.lua",
     "AV-STAGE-ROUTER-CONTROLLER.lua",
     "AV-TEAM-EQUIP-CONTROLLER.lua",
 }
