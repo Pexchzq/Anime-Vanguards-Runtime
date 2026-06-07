@@ -63,7 +63,7 @@ local lastSignature = nil
 local lastScanClock = nil
 
 local function log(message)
-    print(string.format("[%s] %s", VERSION, tostring(message)))
+    print("[Brain] " .. tostring(message))
 end
 
 local function isGuidLike(text)
@@ -448,12 +448,6 @@ _G.AVStop = function()
 end
 _G.AVMacroStop = _G.AVStop
 
-log("loaded | auto-start enabled")
-log("stop Brain+Reader+Controller: _G.AVStop()")
-log("status: _G.AVBrainStatus()")
-log("snapshot: _G.AVBrainSnapshot()")
-log("can start macro: _G.AVBrainCanStartMacro(\"Map Name\")")
-log("print snapshot: _G.AVBrainPrintSnapshot()")
-log("force scan: _G.AVBrainScanNow()")
+log("loaded")
 
 task.defer(start)
