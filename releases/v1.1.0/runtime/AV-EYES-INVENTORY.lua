@@ -47,7 +47,7 @@ local state = {
 local previousAVStop = rawget(_G, "AVStop")
 
 local function log(message)
-    print("[" .. VERSION .. "] " .. tostring(message))
+    print("[Eyes] " .. tostring(message))
 end
 
 local function isUuid(value)
