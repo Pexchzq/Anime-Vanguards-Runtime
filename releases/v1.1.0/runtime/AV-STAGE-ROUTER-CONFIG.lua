@@ -30,19 +30,19 @@ local config = {
             Name = "Story Stage11 before level 30",
             Enabled = true,
             When = {
-                MaxLevel = 31,
+                MaxLevel = 30,
             },
             Match = {
                 Difficulty = "Normal",
                 Act = "Act1",
                 StageType = "Story",
-                Stage = "Stage12",
+                Stage = "Stage11",
                 FriendsOnly = false,
             },
         },
         {
             Name = "Story Stage12 from level 30",
-            Enabled = false,
+            Enabled = true,
             When = {
                 MinLevel = 30,
             },
@@ -58,6 +58,6 @@ local config = {
 }
 
 _G.AVStageRouterConfig = config
-print("[AV-STAGE-ROUTER-CONFIG V1.0] loaded | rules=" .. tostring(#config.Rules))
+print("[Config] stage router loaded | autoStart=" .. tostring(config.AutoStart) .. " | rules=" .. tostring(#config.Rules))
 
 return config
