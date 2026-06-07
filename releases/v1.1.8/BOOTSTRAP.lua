@@ -1,4 +1,4 @@
-﻿--[[
+--[[
     ANIME VANGUARDS MACRO SYSTEM BOOTSTRAP
     RELEASE: v1.1.8
 
