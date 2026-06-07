@@ -75,6 +75,6 @@ local config = {
 }
 
 _G.AVControllerConfig = config
-print("[AV-CONTROLLER-CONFIG V1.0] loaded | defaultAction=" .. tostring(config.EndScreenPolicy.DefaultAction) .. " | teamEquipEnabled=" .. tostring(config.TeamEquip.Enabled))
+print("[Config] controller loaded | endAction=" .. tostring(config.EndScreenPolicy.DefaultAction) .. " | teamEquip=" .. tostring(config.TeamEquip.Enabled))
 
 return config
