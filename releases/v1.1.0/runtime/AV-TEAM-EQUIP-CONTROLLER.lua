@@ -73,7 +73,7 @@ local state = {
 local previousAVStop = rawget(_G, "AVStop")
 
 local function log(message)
-    print("[" .. VERSION .. "] " .. tostring(message))
+    print("[Team] " .. tostring(message))
 end
 
 local function verboseLog(config, message)
@@ -308,9 +308,7 @@ local function start()
     if occupied >= config.MaxSlots then
         state.reason = "slots already full"
         log("not started | reason=slots already full")
-        if config.PrintSlotsOnFinish then
-            printSlots()
-        end
+        printSlots()
         return false
     end
 
@@ -428,9 +426,8 @@ _G.AVStop = function()
 end
 
 log("loaded")
-log("status: _G.AVTeamEquipStatus()")
 
 local initialConfig = getConfig()
-if initialConfig.Enabled and initialConfig.AutoStart then
+if initialConfig.Enabled and initialConfig.AutoStart and not rawget(_G, "AVBootstrapManagedStartup") then
     start()
 end
