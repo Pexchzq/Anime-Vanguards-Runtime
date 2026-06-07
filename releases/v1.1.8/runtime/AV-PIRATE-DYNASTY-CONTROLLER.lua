@@ -3,7 +3,8 @@
     VERSION: V1.0
 
     Role:
-    - Runs only after StageRouter confirms Pirate Dynasty runtime.
+    - Runs after Pirate Dynasty runtime is confirmed.
+    - Can auto-detect Pirate Dynasty runtime without StageRouter.
     - Uses InterfaceEvent remotes for Pirate Dynasty pre-match setup.
     - Does not enter Pirate Dynasty by itself.
 
@@ -19,7 +20,8 @@ local Workspace = game:GetService("Workspace")
 
 local DEFAULT_CONFIG = {
     Enabled = true,
-    AutoStart = false,
+    AutoStart = true,
+    AutoDetectRuntime = true,
     CharacterId = "ElasticCaptainPirate",
     CharacterDisplayName = "Elastic Captain (Cog 4th)",
     RequiredRunes = {},
@@ -28,6 +30,7 @@ local DEFAULT_CONFIG = {
     DifficultyWhenRunesMissing = "Easy",
     TargetModifier = "Floodgates",
     WaitForRuntimeSeconds = 20,
+    AutoDetectPollSeconds = 1.0,
     WaitForRunesSeconds = 6,
     WaitForVoteSeconds = 20,
     RemoteDelaySeconds = 0.5,
@@ -50,6 +53,7 @@ local state = {
     reason = "idle",
     lastDifficulty = nil,
     runeReady = false,
+    watcherRunning = false,
 }
 
 local previousAVStop = rawget(_G, "AVStop")
@@ -374,7 +378,38 @@ local function start(overrideConfig)
     return true
 end
 
+local function startAutoWatcher()
+    if state.watcherRunning then
+        return false
+    end
+
+    local config = mergeConfig()
+    if not config.Enabled or not config.AutoStart or not config.AutoDetectRuntime then
+        return false
+    end
+
+    state.watcherRunning = true
+    task.spawn(function()
+        log("watching for Pirate Dynasty runtime")
+
+        while state.watcherRunning and not state.stopRequested do
+            local runtimeOk, runtimeSource = pirateRuntimeExists()
+            if runtimeOk then
+                if not state.running then
+                    log("runtime detected | source=" .. tostring(runtimeSource))
+                    start()
+                end
+                return
+            end
+            task.wait(config.AutoDetectPollSeconds or 1)
+        end
+    end)
+
+    return true
+end
+
 local function stop()
+    state.watcherRunning = false
     state.stopRequested = true
     state.runId += 1
     state.reason = "manual stop"
@@ -406,5 +441,13 @@ log("loaded")
 
 local initialConfig = mergeConfig()
 if initialConfig.Enabled and initialConfig.AutoStart and not rawget(_G, "AVBootstrapManagedStartup") then
-    start()
+    if initialConfig.AutoDetectRuntime then
+        startAutoWatcher()
+    else
+        start()
+    end
+end
+
+if initialConfig.Enabled and initialConfig.AutoStart and rawget(_G, "AVBootstrapManagedStartup") then
+    startAutoWatcher()
 end
