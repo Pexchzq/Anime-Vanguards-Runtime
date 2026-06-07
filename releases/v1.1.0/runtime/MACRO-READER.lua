@@ -76,7 +76,7 @@ local macroSourceLabel = nil
 local readBrainSnapshot = nil
 
 local function log(message)
-    print(string.format("[%s] %s", VERSION, tostring(message)))
+    print("[Reader] " .. tostring(message))
 end
 
 local function isGuidLike(text)
@@ -1136,12 +1136,6 @@ _G.AVStop = function()
 end
 _G.AVMacroStop = _G.AVStop
 
-log("loaded | auto-start by map config enabled")
-log("stop Brain+Reader: _G.AVStop()")
-log("start custom: _G.MacroReaderStart(\"C:/Users/Siwakan Talasak/AppData/Local/Potassium/workspace/macro_1780459527.lua\")")
-log("start JSON: _G.MacroReaderStartFromJson('{\"version\":1,\"steps\":[...]}')")
-log("start URL: _G.MacroReaderStartFromUrl(\"https://cdn.discordapp.com/attachments/...\")")
-log("test first render only: _G.MacroReaderTestFirstRender()")
-log("status: _G.MacroReaderStatus()")
+log("loaded | waiting for matching map")
 
 task.defer(macroReaderStartFromMapConfig)
